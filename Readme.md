@@ -1,3 +1,3 @@
 # A* PathFinding
 
-<img src="imagem.PNG">
+<img  width="400" height="760" src="imagem.PNG">
