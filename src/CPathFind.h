@@ -2,6 +2,7 @@
 #include <vector>
 #include <utility>
 #include "CNode.h"
+#include <queue>
 
 typedef CAStarNode** Map;//Map[y][x]
   
@@ -26,5 +27,6 @@ class CPathFind
 
         void PushOpen(CAStarNode* node);
         void PopOpen(CAStarNode* node);
-        std::vector<CAStarNode*> openList, closedList;
+        std::priority_queue<CAStarNode*> openList;
+        std::vector<CAStarNode*> closedList;
 };

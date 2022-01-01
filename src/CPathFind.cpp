@@ -124,7 +124,7 @@ void CPathFind::PushOpen(CAStarNode* node)
      //   return;
 
     node->IsOpen = true;
-    openList.push_back(node);
+    openList.push(node);
 }
 
 void CPathFind::PopOpen(CAStarNode* node)
@@ -143,20 +143,19 @@ std::vector<CAStarNode*> CPathFind::FindPath(int startX, int startY, int endX, i
         return std::vector<CAStarNode*>();
     }
 
-    openList.clear();
+    //openlist  clear
+    while(!openList.empty()){openList.pop();}
     closedList.clear();
 
 
     map[startX][startY]->calculateCost(startX, startY, endX, endY);
-    openList.push_back(map[startX][startY]);
+    openList.push(map[startX][startY]);
     map[startX][startY]->IsOpen = true;
 
     CAStarNode* currentNode;
-    while (openList.size() > 0)
+    while (!openList.empty())
     {
-
-        std::sort(openList.begin(), openList.end(), [](CAStarNode* a, CAStarNode* b) { return a->f < b->f; });
-        currentNode = openList.front();
+        currentNode = openList.top();
 
         if(currentNode->x == endX && currentNode->y == endY)
         {
@@ -164,8 +163,8 @@ std::vector<CAStarNode*> CPathFind::FindPath(int startX, int startY, int endX, i
             return reconstructPath(currentNode);
         }
         
-        openList[0]->IsOpen = false;
-        openList.erase(openList.begin());
+        currentNode->IsOpen = false;
+        openList.pop();
         
         closedList.push_back(currentNode);
         currentNode->IsClosed = true;
@@ -182,12 +181,10 @@ std::vector<CAStarNode*> CPathFind::FindPath(int startX, int startY, int endX, i
 
             float tempG = currentNode->g + currentNode->distanceTo(neighbor->x, neighbor->y);
 
-            //if(!neighbor->isInList(openList))
             if(!neighbor->IsOpen)
             {
-                openList.push_back(neighbor);
+                openList.push(neighbor);
                 neighbor->IsOpen = true;
-                //std::push_heap(openList.begin(), openList.end(),[] (CAStarNode* a, CAStarNode* b) { return a->f < b->f; });
             }
             else if (tempG >= neighbor->g)
                 continue;
