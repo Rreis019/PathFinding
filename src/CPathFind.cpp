@@ -22,20 +22,36 @@ void CPathFind::LoadMap(char* filename)
     file >> width >> height;
     DEBUG_PRINT("Map size: %d x %d\n", width, height);
 
-    map = new Map[width];
-    for(int i = 0; i < width; i++)
+
+
+    map = new Map[height];
+    for(int i = 0; i < height; i++)
     {
-        map[i] = new CAStarNode*[height];
+        map[i] = new CAStarNode*[width];
     }
 
+
     //read map as int array
+    /*
     for(int i = 0; i < width; i++)
     {
         for(int j = 0; j < height; j++)
         {
             int tmp;
             file >> tmp;
-            map[j][i] = new CAStarNode(j,i,tmp);
+            printf("%d,", tmp);
+            map[i][j] = new CAStarNode(i,j,tmp);
+        }
+    }*/
+
+
+    for(int y = 0 ; y < height;y++)
+    {
+        for(int x = 0 ; x < width;x++)
+        {
+            int tmp;
+            file >> tmp;
+            map[y][x] = new CAStarNode(x,y,tmp);
         }
     }
 
@@ -61,12 +77,12 @@ void CPathFind::PrintMap()
 {
     if(!DEBUG)
         return;
-        
-    for(int i = 0; i < width; i++)
-    {
-        for(int j = 0; j < height; j++)
+
+    for(int y = 0; y< height; y++)
+    {  
+        for(int x = 0; x < width; x++)
         {
-            printf("%d ", map[j][i]->value);
+            printf("%d ", map[y][x]->value);
         }
         printf("\n");
     }
@@ -74,8 +90,12 @@ void CPathFind::PrintMap()
 
 void CPathFind::FreeMap()
 {
-    for(int i = 0; i < width; i++)
+    for(int i = 0; i < height; i++)
     {
+        for(int j = 0; j < width; j++)
+        {
+            delete map[i][j];
+        }
         delete[] map[i];
     }
     delete[] map;
@@ -87,19 +107,19 @@ std::vector<CAStarNode*> CPathFind::GetNeighbors(CAStarNode* currentNode)
 
     //left
     if(currentNode->x > 0)
-        neighbors.push_back(map[currentNode->x-1][currentNode->y]);
+        neighbors.push_back(map[currentNode->y][currentNode->x-1]);
 
     //right
     if(currentNode->x < width-1)
-        neighbors.push_back(map[currentNode->x+1][currentNode->y]);
+        neighbors.push_back(map[currentNode->y][currentNode->x+1]);
 
     //up
     if(currentNode->y > 0)
-        neighbors.push_back(map[currentNode->x][currentNode->y-1]);
+        neighbors.push_back(map[currentNode->y-1][currentNode->x]);
 
     //down
     if(currentNode->y < height-1)
-        neighbors.push_back(map[currentNode->x][currentNode->y+1]);
+        neighbors.push_back(map[currentNode->y+1][currentNode->x]);
 
     return neighbors;
 }
@@ -148,9 +168,9 @@ std::vector<CAStarNode*> CPathFind::FindPath(int startX, int startY, int endX, i
     closedList.clear();
 
 
-    map[startX][startY]->calculateCost(startX, startY, endX, endY);
-    openList.push(map[startX][startY]);
-    map[startX][startY]->IsOpen = true;
+    map[startY][startX]->calculateCost(startX, startY, endX, endY);
+    openList.push(map[startY][startX]);
+    map[startY][startX]->IsOpen = true;
 
     CAStarNode* currentNode;
     while (!openList.empty())
@@ -174,13 +194,14 @@ std::vector<CAStarNode*> CPathFind::FindPath(int startX, int startY, int endX, i
         for(auto neighbor : neighbors)
         {
             bool isInClosedList =  neighbor->IsClosed;//neighbor->isInList(closedList);
-            bool isWalkable = map[neighbor->x][neighbor->y]->value == 0;
+            bool isWalkable = map[neighbor->y][neighbor->x]->value == 0;
 
             if(isInClosedList || !isWalkable)
                 continue;
 
             float tempG = currentNode->g + currentNode->distanceTo(neighbor->x, neighbor->y);
 
+            //if(!neighbor->isInList(openList))
             if(!neighbor->IsOpen)
             {
                 openList.push(neighbor);
@@ -204,24 +225,25 @@ std::vector<CAStarNode*> CPathFind::FindPath(int startX, int startY, int endX, i
 void CPathFind::VisualizePath(std::vector<CAStarNode*> path)
 {
     //loop all map and print value
-    for(int i = 0; i < width; i++)
+    for(int y = 0; y < height; y++)
     {
-        for(int j = 0; j < height; j++)
+        for(int x = 0; x < width; x++)
         {
-            if(map[j][i]->isInList(path))
+            if(map[y][x]->isInList(path))
             {
                 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	            SetConsoleTextAttribute(hConsole, 12);
+                SetConsoleTextAttribute(hConsole, 12);
             }
             else
             {
                 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
                 SetConsoleTextAttribute(hConsole, 15);
             }
-                
-            printf("%d ", map[j][i]->value);
+            printf("%d ", map[y][x]->value);
         }
         printf("\n");
     }
+
+  
 }
 
