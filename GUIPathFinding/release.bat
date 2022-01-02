@@ -1,0 +1,2 @@
+g++ -c src/*.cpp -std=c++14 -m64 -O3 -Wall -IC:/mingw64/include
+g++ *.o  -LC:/mingw64/lib  -mwindows -lmingw32 -lSDL2main -lSDL2_image -lSDL2 -lSDL2_ttf   -o bin/Release/main -s && start bin/Release/main.exe
